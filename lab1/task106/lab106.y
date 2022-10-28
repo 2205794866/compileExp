@@ -24,6 +24,7 @@ calclist:
 	%empty
 	|calclist exp EOL {printf("=%.10g\n",$2);}
 exp:term
+    term 
 	;
 
 term:NUM
