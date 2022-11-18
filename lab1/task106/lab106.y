@@ -13,8 +13,9 @@ void yyerror(char const *);
 %token EOL
 %token ADD SUB MUL DIV
 
- /* begin */
 
+ /* begin */
+%token LP RP
 
  /* end */
 %% 
@@ -23,6 +24,7 @@ void yyerror(char const *);
 calclist:
 	%empty
 	|calclist exp EOL {printf("=%.10g\n",$2);}
+<<<<<<< HEAD
 exp:term
 	;
 
@@ -30,6 +32,24 @@ term:NUM
 	;
 
 
+=======
+
+exp     :term           { $$ = $1; }
+        |exp ADD term   { $$ = $1 + $3;}
+        |exp SUB term   { $$ = $1 - $3;}
+	    ;
+
+term    :factor         { $$ = $1;}
+        |term MUL factor { $$ = $1 * $3;}
+        |term DIV factor { $$ = $1 / $3;}
+	    ;
+
+factor  : NUM           {$$ = $1;}
+        |LP exp RP      {$$ = $2;}
+        |SUB factor     {$$ = -$2;}
+        |ADD factor     {$$ = $2;}
+        ;
+>>>>>>> ac2d5e5933c42ab46add00ee7c21042925483205
 
  /* end */
 %%
@@ -59,6 +79,11 @@ int yylex(void)
     case '-': return SUB;
 	case '*': return MUL;
 	case '/': return DIV;
+<<<<<<< HEAD
+=======
+    case '(': return LP;
+    case ')': return RP;
+>>>>>>> ac2d5e5933c42ab46add00ee7c21042925483205
 	default:
 		return c;
 		

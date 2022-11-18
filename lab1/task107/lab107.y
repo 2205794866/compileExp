@@ -41,14 +41,25 @@ calclist:
 	%empty
 	|calclist exp EOL {printf("=%.10g\n",$2);}
 	
-exp:term
-   	|exp ADD exp {$$=$1+$3;}
-	|exp SUB exp {$$=$1-$3;}
-	|error {}
-	;
+exp     :term
+   	    |exp ADD exp {$$=$1+$3;}
+	    |exp SUB exp {$$=$1-$3;}
+	    |error {}
+	    ;
 
-term:NUM
-	;
+term    :pown         { $$ = $1;}
+        |term MUL term { $$ = $1 * $3;}
+        |term DIV term { $$ = $1 / $3;}
+	    ;
+
+pown    :factor         {$$ = $1;}
+        |pown EXPO pown   {$$ = pow($1, $3);}
+
+factor  : NUM           {$$ = $1;}
+        |LP exp RP      {$$ = $2;}
+        |SUB factor     {$$ = -$2;}
+        |ADD factor     {$$ = $2;}
+        ;
 %%
 
 int main(int args,char **argv){

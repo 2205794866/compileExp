@@ -1,1 +1,7 @@
 .vscode
+*.o
+error.txt
+token.cpp
+tokens.txt
+minic
+test.in

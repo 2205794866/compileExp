@@ -1,3 +1,5 @@
+# compileExp
+华中科技大学网络空间安全学院编译原理实验
 # 编译原理实验指导说明
 
 1. 实验环境为Ubuntu20.04系统，安装有LLVM-10，clang-10，git，vscode-server及相关插件等基础软件。
