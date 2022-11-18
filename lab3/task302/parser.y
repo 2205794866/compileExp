@@ -65,8 +65,8 @@ Specifier: TYPE {std::cout<<"Specifier"<<std::endl;} /* 基本类型 */
         | StructSpecifier {std::cout<<"Specifier"<<std::endl;} /* 结构类型 */
         ;
  
-StructSpecifier: STRUCT OptTag LC DefList RC {std::cout<<"Specifier"<<std::endl;} /* 基本结构 */
-        | STRUCT Tag {std::cout<<"Specifier"<<std::endl;} /* 简单结构 */
+StructSpecifier: STRUCT OptTag LC DefList RC {std::cout<<"StructSpecifier"<<std::endl;} /* 基本结构 */
+        | STRUCT Tag {std::cout<<"StructSpecifier"<<std::endl;} /* 简单结构 */
         ;
 
 OptTag : ID {std::cout<<"OptTag"<<std::endl;} /* 可选名称 */
