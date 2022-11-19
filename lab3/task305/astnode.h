@@ -68,6 +68,7 @@ public:
 class NIdentifier : public NExpression {
 public:
   // std::string name;
+  NIdentifier() {}
   NIdentifier(const std::string &name) { this->name = name; }
   int parse();
 
@@ -163,6 +164,9 @@ public:
 };
 
 /*Specifiers*/
+
+
+
 class NSpecifier : public Node {
 public:
   std::string type;
@@ -260,13 +264,39 @@ public:
 };
 
 /*Specifiers*/
+class NOptTag : public NIdentifier {
+public:
+  NIdentifier &Id;
+  NOptTag(NIdentifier &Id) : Id(Id){}
+  std::string getNodeName() { return "OptTag"; }
+  int parse();
+};
+
+class NTag : public NIdentifier {
+public:
+  NIdentifier &Id;
+  NTag(NIdentifier &Id) : Id(Id){}
+  std::string getNodeName() { return "Tag"; }
+  int parse();
+};
+
+
 class NStructSpecifier : public NSpecifier {
 public:
-  NIdentifier *tag = nullptr;
+  NTag *tag = nullptr;
+  NOptTag *optTag = nullptr;
   NDefList *deflist = nullptr;
-  NStructSpecifier(NIdentifier *tag) : tag(tag) {}
-  NStructSpecifier(NIdentifier *tag, NDefList *deflist)
-      : tag(tag), deflist(deflist) {}
+  NStructSpecifier(NTag *tag) : tag(tag) {}
+  NStructSpecifier(NOptTag *optTag, NDefList *deflist)
+      : optTag(optTag), deflist(deflist) {}
+  std::string getNodeName() { return "StructSpecifier"; }
+  int parse();
+};
+
+class NStructSpSpecifier : public NSpecifier {
+public:
+  NStructSpecifier &nStructSpecifier;
+  NStructSpSpecifier(NStructSpecifier &nStructSpecifier) : nStructSpecifier(nStructSpecifier) {}
   int parse();
 };
 /*Statements*/
