@@ -124,7 +124,101 @@ int main(int argc, char *argv[]) {
   //判断参数是否符合 自行处理
   Value *callputchar = builder->CreateCall(calleeF, argsV, "callputchar");
   // begin
-  
+
+  // U
+  // 得到常量
+  const_1 = ConstantInt::get(*theContext, APInt(32, 'U', true));
+  // 初始化
+  builder->CreateStore(const_1, alloca_a);
+  // 处理参数
+  argsV.pop_back();
+  // 加载a
+  load_a4 = builder->CreateLoad(alloca_a->getAllocatedType(), alloca_a, "a");
+  argsV.push_back(load_a4);
+  // 调用函数
+  callputchar = builder->CreateCall(calleeF, argsV, "callputchar");
+
+  // S
+  // 得到常量
+  const_1 = ConstantInt::get(*theContext, APInt(32, 'S', true));
+  // 初始化
+  builder->CreateStore(const_1, alloca_a);
+  // 处理参数
+  argsV.pop_back();
+  // 加载a
+  load_a4 = builder->CreateLoad(alloca_a->getAllocatedType(), alloca_a, "a");
+  argsV.push_back(load_a4);
+  // 调用函数
+  callputchar = builder->CreateCall(calleeF, argsV, "callputchar");
+
+  // T
+  // 得到常量
+  const_1 = ConstantInt::get(*theContext, APInt(32, 'T', true));
+  // 初始化
+  builder->CreateStore(const_1, alloca_a);
+  // 处理参数
+  argsV.pop_back();
+  // 加载a
+  load_a4 = builder->CreateLoad(alloca_a->getAllocatedType(), alloca_a, "a");
+  argsV.push_back(load_a4);
+  // 调用函数
+  callputchar = builder->CreateCall(calleeF, argsV, "callputchar");
+
+  // C
+  // 得到常量
+  const_1 = ConstantInt::get(*theContext, APInt(32, 'C', true));
+  // 初始化
+  builder->CreateStore(const_1, alloca_a);
+  // 处理参数
+  argsV.pop_back();
+  // 加载a
+  load_a4 = builder->CreateLoad(alloca_a->getAllocatedType(), alloca_a, "a");
+  argsV.push_back(load_a4);
+  // 调用函数
+  callputchar = builder->CreateCall(calleeF, argsV, "callputchar");
+
+  // S
+  // 得到常量
+  const_1 = ConstantInt::get(*theContext, APInt(32, 'S', true));
+  // 初始化
+  builder->CreateStore(const_1, alloca_a);
+  // 处理参数
+  argsV.pop_back();
+  // 加载a
+  load_a4 = builder->CreateLoad(alloca_a->getAllocatedType(), alloca_a, "a");
+  argsV.push_back(load_a4);
+  // 调用函数
+  callputchar = builder->CreateCall(calleeF, argsV, "callputchar");
+
+
+  // E
+  // 得到常量
+  const_1 = ConstantInt::get(*theContext, APInt(32, 'E', true));
+  // 初始化
+  builder->CreateStore(const_1, alloca_a);
+  // 处理参数
+  argsV.pop_back();
+  // 加载a
+  load_a4 = builder->CreateLoad(alloca_a->getAllocatedType(), alloca_a, "a");
+  argsV.push_back(load_a4);
+  // 调用函数
+  callputchar = builder->CreateCall(calleeF, argsV, "callputchar");
+
+
+  // \n
+  // 得到常量
+  const_1 = ConstantInt::get(*theContext, APInt(32, 10, true));
+  // 初始化
+  builder->CreateStore(const_1, alloca_a);
+  // 处理参数
+  argsV.pop_back();
+  // 加载a
+  load_a4 = builder->CreateLoad(alloca_a->getAllocatedType(), alloca_a, "a");
+  argsV.push_back(load_a4);
+  // 调用函数
+  callputchar = builder->CreateCall(calleeF, argsV, "callputchar");
+
+
   // end
   //设置返回值
   builder->CreateRet(const_1);
