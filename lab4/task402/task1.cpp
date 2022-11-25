@@ -205,18 +205,18 @@ int main(int argc, char *argv[]) {
   callputchar = builder->CreateCall(calleeF, argsV, "callputchar");
 
 
-  // \n
-  // 得到常量
-  const_1 = ConstantInt::get(*theContext, APInt(32, 10, true));
-  // 初始化
-  builder->CreateStore(const_1, alloca_a);
-  // 处理参数
-  argsV.pop_back();
-  // 加载a
-  load_a4 = builder->CreateLoad(alloca_a->getAllocatedType(), alloca_a, "a");
-  argsV.push_back(load_a4);
-  // 调用函数
-  callputchar = builder->CreateCall(calleeF, argsV, "callputchar");
+  // // \n
+  // // 得到常量
+  // const_1 = ConstantInt::get(*theContext, APInt(32, 10, true));
+  // // 初始化
+  // builder->CreateStore(const_1, alloca_a);
+  // // 处理参数
+  // argsV.pop_back();
+  // // 加载a
+  // load_a4 = builder->CreateLoad(alloca_a->getAllocatedType(), alloca_a, "a");
+  // argsV.push_back(load_a4);
+  // // 调用函数
+  // callputchar = builder->CreateCall(calleeF, argsV, "callputchar");
 
 
   // end

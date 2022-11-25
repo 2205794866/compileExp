@@ -167,13 +167,13 @@ int main(int argc, char *argv[]) {
   f->getBasicBlockList().push_back(ifcontb);
   // 进入 ifcontb
   builder->SetInsertPoint(ifcontb);
-  // 获得常量 /r
-  Value *const_3 = ConstantInt::get(*theContext, APInt(32, 10, true));
-  // 处理参数
-  argsV.push_back(const_3);
-  // 输出
-  Value *callputchar_2 = builder->CreateCall(callput, argsV, "callputchar");
-  argsV.pop_back();
+  // // 获得常量 /r
+  // Value *const_3 = ConstantInt::get(*theContext, APInt(32, 10, true));
+  // // 处理参数
+  // argsV.push_back(const_3);
+  // // 输出
+  // Value *callputchar_2 = builder->CreateCall(callput, argsV, "callputchar");
+  // argsV.pop_back();
 
   // end
   //设置返回值
