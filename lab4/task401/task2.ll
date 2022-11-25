@@ -7,13 +7,13 @@ target triple = "x86_64-pc-linux-gnu"
 define dso_local i32 @main() #0 {
   %1 = alloca i32, align 4
   %2 = alloca i32, align 4
-  store i32 0, i32* %1, align 4
-  store i32 1, i32* %2, align 4
-  %3 = call i32 @getchar()
-  store i32 %3, i32* %2, align 4
-  %4 = load i32, i32* %2, align 4
-  %5 = icmp eq i32 %4, 97
-  br i1 %5, label %6, label %8
+  store i32 0, i32* %1, align 4 ;%1 = 0
+  store i32 1, i32* %2, align 4 ;%2 = 1
+  %3 = call i32 @getchar()      ;%3 = getchar()
+  store i32 %3, i32* %2, align 4  ;%2 = %3
+  %4 = load i32, i32* %2, align 4 ;%4 = %2
+  %5 = icmp eq i32 %4, 97         ;%4 == a?
+  br i1 %5, label %6, label %8    ;if %5 == 1, jmp %6, else jmp %8
 
 6:                                                ; preds = %0
   %7 = call i32 @putchar(i32 89)
