@@ -684,51 +684,51 @@ Value *NBinaryOperator::codegen() {
   return nullptr;
   if (name == "AND")
   {
-    retVal = builder->CreateAdd(tempRHS, tempLHS, "and");
+    retVal = builder->CreateAdd(tempLHS, tempRHS, "and");
   }
   else if(name == "OR")
   {
-    retVal = builder->CreateOr(tempRHS, tempLHS, "or");
+    retVal = builder->CreateOr(tempLHS, tempRHS, "or");
   }
   else if(name == "RELOP==")
   {
-    retVal = builder->CreateICmpEQ(tempRHS, tempLHS, "EQ");
+    retVal = builder->CreateICmpEQ(tempLHS, tempRHS, "EQ");
   }
   else if(name == "RELOP<=")
   {
-    retVal = builder->CreateICmpSLE(tempRHS, tempLHS, "SLE");
+    retVal = builder->CreateICmpSLE(tempLHS, tempRHS, "SLE");
   }
   else if(name == "RELOP>=")
   {
-    retVal = builder->CreateICmpSGE(tempRHS, tempLHS, "SGE");
+    retVal = builder->CreateICmpSGE(tempLHS, tempRHS, "SGE");
   }
   else if(name == "RELOP<")
   {
-    retVal = builder->CreateICmpSLT(tempRHS, tempLHS, "SLT");
+    retVal = builder->CreateICmpSLT(tempLHS, tempRHS, "SLT");
   }
   else if(name == "RELOP>")
   {
-    retVal = builder->CreateICmpSGT(tempRHS, tempLHS, "SGT");
+    retVal = builder->CreateICmpSGT(tempLHS, tempRHS, "SGT");
   }
   else if(name == "PLUS")
   {
-    retVal = builder->CreateAdd(tempRHS, tempLHS, "add");
+    retVal = builder->CreateAdd(tempLHS, tempRHS, "add");
   }
   else if(name == "MINUS")
   {
-    retVal = builder->CreateSub(tempRHS, tempLHS, "sub");
+    retVal = builder->CreateSub(tempLHS, tempRHS, "sub");
   }
   else if(name == "STAR")
   {
-    retVal = builder->CreateMul(tempRHS, tempLHS, "mul");
+    retVal = builder->CreateMul(tempLHS, tempRHS, "mul");
   }
   else if(name == "DIV")
   {
-    retVal = builder->CreateSDiv(tempRHS, tempLHS, "sdiv");
+    retVal = builder->CreateSDiv(tempLHS, tempRHS, "sdiv");
   }
   else if(name == "MOD")
   {
-    retVal = builder->CreateSRem(tempRHS, tempLHS, "srem");
+    retVal = builder->CreateSRem(tempLHS, tempLHS, "srem");
   }
   return retVal;
   // end
