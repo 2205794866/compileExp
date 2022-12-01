@@ -9,6 +9,40 @@ extern std::unique_ptr<legacy::FunctionPassManager> theFPM;
 extern int grammererror;
 extern std::map<std::string, AllocaInst *> curNamedValues;
 
+/* --------------------begin--------------*/
+// #define DEBUG
+void debug(std::string s)
+{
+#ifdef DEBUG
+  std::cout << s << std::endl;
+#endif
+}
+
+
+struct LocalVarTable
+{
+  int level;
+  std::map<std::string, AllocaInst *> localVar;
+};
+
+std::vector<LocalVarTable> varTable;
+std::vector<LocalVarTable>::iterator varIte;
+int level = -1;
+bool funWithArg = false;
+int findVar(std::string name)
+{
+  for(varIte = varTable.end() - 1; varIte >= varTable.begin(); varIte --)
+  {
+    if(varIte->localVar[name])
+    return varIte->level;
+  }
+  return -1;
+}
+
+
+
+/* --------------------end---------------*/
+
 extern BasicBlock *continueBasicBlock;
 void printspaces() {
   for (int i = 0; i < spaces; ++i)
@@ -67,6 +101,7 @@ Function *getFunction(std::string Name) {
   // First, see if the function has already been added to the current module.
   if (auto *F = theModule->getFunction(Name))
     return F;
+  return nullptr;
 }
 
 /// CreateEntryBlockAlloca - Create an alloca instruction in the entry block
@@ -556,53 +591,209 @@ Value *NInteger::codegen() {
 }    
 Value *NFloat::codegen() {
   // begin
-
-  return nullptr;
+  return ConstantFP::get(*theContext, APFloat(value));
   // end
 }
 Value *NChar::codegen() {
   // begin
-
-  return nullptr;
+  debug("NChar");
+  return ConstantInt::get(*theContext, APInt(32, value, true));
   // end
 }
 Value *NIdentifier::codegen() {
+  debug(std::string("NIdentifier") + ":" + name);
   // begin
-
-  return nullptr;
+  Value *retVal;
+  // 从底层往上查找
+  int varLevel = -1;
+  if((varLevel = findVar(name)) != -1)
+  {
+    retVal = builder->CreateLoad(varTable[varLevel].localVar[std::string(name)], "load");
+  }
+  else
+  {
+    printSemanticError(1, line, "Undefined" + name);
+    return LogErrorV("Error.");
+  }
+  return retVal;
   // end
 }
 Value *NArgs::codegen() { return exp.codegen(); }
 Value *NMethodCall::codegen() {
+  debug("NMethodCall");
   // begin
-
-  return nullptr;
+  Value *retVal;
+  // 参数列表
+  std::vector<Value *> argsV;
+  // 获取函数
+  Function *func = theModule->getFunction(id.name);
+  // 函数是否存在检查
+  if(func == nullptr)
+  {
+    printSemanticError(2, line, "Undefined Method " + id.name);
+    return LogErrorV("Undefined Method.");
+  }
+  // 添加函数参数
+  for (auto pArg = this->nargs; pArg != nullptr ; pArg = pArg->nArgs)
+  {
+    argsV.push_back(pArg->codegen());
+  }
+  // 函数参数个数检查
+  if(argsV.size() != func->arg_size())
+  {
+    printSemanticError(8, line, "Wrong arg num.");
+    return LogErrorV("Wrong arg num.");
+  }  
+  // 函数类型检查
+  for(std::size_t i = 0; i<argsV.size(); i++)
+  {
+    if(argsV[i]->getType() != func->getArg(i)->getType())
+    {
+      printSemanticError(8, line, "Wrong arg type.");
+      return LogErrorV("Wrong arg type.");
+    }
+  }
+  // 函数调用
+  retVal = builder->CreateCall(func, argsV, "methodCall");
+  return retVal;
   // end
 }
 Value *NParenOperator::codegen() { return exp.codegen(); }
 Value *NSingleOperator::codegen() {
+  debug("NSingleOperator");
   // begin
-
+  Value *retVal = nullptr;
+  Value *tempHS = hs.codegen();
+  // 检查左变量
+  if(tempHS == nullptr) 
+  {
+    return nullptr;
+  }
+  if(name == "PLUSPLUS-")
+  {}
+  
   return nullptr;
   // end
 }
 Value *NBinaryOperator::codegen() {
+  debug("NBinaryOperator");
   // begin
-
+  Value *retVal = nullptr;
+  Value *tempLHS = lhs.codegen(), *tempRHS = rhs.codegen();
+  if(tempLHS == nullptr || tempRHS == nullptr)
   return nullptr;
+  if (name == "AND")
+  {
+    retVal = builder->CreateAdd(tempLHS, tempRHS, "and");
+  }
+  else if(name == "OR")
+  {
+    retVal = builder->CreateOr(tempLHS, tempRHS, "or");
+  }
+  else if(name == "RELOP==")
+  {
+    retVal = builder->CreateICmpEQ(tempLHS, tempRHS, "EQ");
+  }
+  else if (name == "RELOP!=") 
+  {
+  retVal = builder->CreateICmpNE(tempLHS, tempRHS, "NE");
+  }
+  else if(name == "RELOP<=")
+  {
+    retVal = builder->CreateICmpSLE(tempLHS, tempRHS, "SLE");
+  }
+  else if(name == "RELOP>=")
+  {
+    retVal = builder->CreateICmpSGE(tempLHS, tempRHS, "SGE");
+  }
+  else if(name == "RELOP<")
+  {
+    retVal = builder->CreateICmpSLT(tempLHS, tempRHS, "SLT");
+  }
+  else if(name == "RELOP>")
+  {
+    retVal = builder->CreateICmpSGT(tempLHS, tempRHS, "SGT");
+  }
+  else if(name == "PLUS")
+  {
+    retVal = builder->CreateAdd(tempLHS, tempRHS, "add");
+  }
+  else if(name == "MINUS")
+  {
+    retVal = builder->CreateSub(tempLHS, tempRHS, "sub");
+  }
+  else if(name == "STAR")
+  {
+    retVal = builder->CreateMul(tempLHS, tempRHS, "mul");
+  }
+  else if(name == "DIV")
+  {
+    retVal = builder->CreateSDiv(tempLHS, tempRHS, "sdiv");
+  }
+  else if(name == "MOD")
+  {
+    retVal = builder->CreateSRem(tempLHS, tempLHS, "srem");
+  }
+  return retVal;
   // end
 }
 Value *NAssignment::codegen() {
   // Assignment requires the LHS to be an identifier.
+  debug(std::string("NAssignment") + lhs.name);
   // begin
+  Value *retVal;
+  int varLevel;
+  if ((varLevel = findVar(std::string(lhs.name))) != -1) 
+  {
+    Value *tempLHS = lhs.codegen(), *tempRHS = rhs.codegen();
+    if (tempLHS == nullptr || tempRHS == nullptr)
+    {
+      return nullptr;
+    }
+      
+    if (tempLHS->getType() != tempRHS->getType())
+    {
+      printSemanticError(5, line, "Type error in binary operator.");
+      return LogErrorV("Error.");
+    }
+    if (this->name == "ASSIGNOP")
+    {
+      builder->CreateStore((retVal = tempRHS), varTable[varLevel].localVar[std::string(lhs.name)]);
+    }
+    else if (this->name == "PLUSASS")
+    {
+      retVal = builder->CreateAdd(tempLHS, tempRHS, "add");
+      builder->CreateStore(retVal, varTable[varLevel].localVar[std::string(lhs.name)]);
+    }
+    else if (this->name == "MINUSASS")
+    {
+      retVal = builder->CreateSub(tempLHS, tempRHS, "sub");
+      builder->CreateStore(retVal, varTable[varLevel].localVar[std::string(lhs.name)]);
+    }
+    else if (this->name == "STARASS")
+    {
+      retVal = builder->CreateMul(tempLHS, tempRHS, "mul");
+      builder->CreateStore(retVal, varTable[varLevel].localVar[std::string(lhs.name)]);
+    }
+    else if (this->name == "DIVASS")
+    {
+      retVal = builder->CreateSDiv(tempLHS, tempRHS, "sdiv");
+      builder->CreateStore(retVal, varTable[varLevel].localVar[std::string(lhs.name)]);
+    }
+  }
+  else
+  {
+    printSemanticError(6, line, "Only rvalue " + lhs.name);
+    return LogErrorV("Error.");
+  }
 
-  return nullptr;
+  return retVal;
   // end
 }
 Value *NSpecifier::codegen() {
   // begin
-
-  return nullptr;
+  debug("NSpecifier");
+  return ConstantInt::get(*theContext, APInt(32, 0, true));
   // end
 }
 Type *NSpecifier::getType() {
@@ -615,16 +806,32 @@ Type *NSpecifier::getType() {
   assert(false);
   return Type::getInt32Ty(*theContext);
 }
-Value *NVarDec::codegen() {
+Value *NVarDec::codegen(Type *varType, Value * varValue) {
+  debug("NVarDec");
   // begin
-
-  return nullptr;
+  Value *retVal = nullptr;
+  // 分配空间
+  AllocaInst *alloca = builder->CreateAlloca(varType, nullptr, Id.name);
+  // 判断是否重定义
+  if(varTable[level].localVar[Id.name])
+  {
+    printSemanticError(3, line, "Redefined " + Id.name);
+    return LogErrorV("Error.");
+  }
+  if(!varValue)
+  {
+    varValue = ConstantInt::get(*theContext, APInt(32, 0, true));
+  }
+  builder->CreateStore(varValue, alloca);
+  retVal = varValue;
+  varTable[level].localVar[std::string(Id.name)] = alloca;
+  return retVal;
   // end
 }
 Value *NParamDec::codegen() {
   // begin
-
-  return nullptr;
+  debug("NParamDec");
+  return ConstantInt::get(*theContext, APInt(32, 0, true));
   // end
 }
 
@@ -639,6 +846,7 @@ Value *NVarList::codegen() {
   return ConstantInt::get(*theContext, APInt(32, 0, true));
 }
 Function *NFunDec::funcodegen(Type *retType) {
+  debug("NFunDec");
   // check if it exists the same name of fun
   if (theModule->getFunction(Id.name)) {
     printSemanticError(4, line, "Redefined " + Id.name);
@@ -648,9 +856,16 @@ Function *NFunDec::funcodegen(Type *retType) {
   std::vector<Type *> argsTypes;
   std::vector<std::string> argNames;
   for (NVarList *item = arguments; item; item = item->nVarList) {
+    funWithArg = true;
     auto tmp = item->nParamDec.getType();
     argNames.push_back(tmp.first);
     argsTypes.push_back(tmp.second);
+  }
+  if (funWithArg) {
+    level++;
+    LocalVarTable localVarTable = {0};
+    localVarTable.level = level;
+    varTable.push_back(localVarTable);
   }
 
   FunctionType *ft = FunctionType::get(retType, argsTypes, false);
@@ -662,16 +877,55 @@ Function *NFunDec::funcodegen(Type *retType) {
   }
   return f;
 }
-Value *NDef::codegen() {
-  // begin
 
-  return nullptr;
+/* -------------------------------------------------*/
+Value* NDec::codegen(Type* varType) { 
+  debug("NDec");
+  // begin
+  Value* retVal = nullptr;
+  if (!exp) {
+      retVal = vardec.codegen(varType, nullptr);
+  } else {
+      retVal = vardec.codegen(varType, exp->codegen());
+  }
+  return retVal;
+  // end
+}
+
+Value* NDecList::codegen(Type* varType) {
+  debug("NDecList");
+  // begin
+  Value* retVal = nullptr;
+  retVal = dec.codegen(varType);
+  if (!retVal) {
+      return nullptr;
+  }
+  if (nDecList) {
+      retVal = nDecList->codegen(varType);
+  }
+  return retVal;
+  // end
+}
+/*--------------------------------------*/
+
+
+Value *NDef::codegen() {
+  debug("NDef");
+  // begin
+  Type *varType = nSpecifier.getType();
+  Value *retVal = nDecList->codegen(varType);
+
+  return retVal;
   // end
 }
 Value *NDefList::codegen() {
+  debug("NDefList");
   // begin
-
-  return nullptr;
+  Value *retVal = nDef.codegen();
+  if(!retVal) return nullptr;
+  if (nDefList) 
+  retVal = nDefList->codegen();
+  return retVal;
   // end
 }
 Value *NStmtList::codegen() {
@@ -683,17 +937,27 @@ Value *NStmtList::codegen() {
 Value *NCompSt::codegen() {
   // 自行处理变量作用域的问题
   Value *retVal = nullptr;
+  if (!funWithArg) {
+    level++;
+    LocalVarTable localVarTable = {0};
+    localVarTable.level = level;
+    varTable.push_back(localVarTable);
+  } else {
+    funWithArg = false;
+  }
   if (ndeflist)
     retVal = ndeflist->codegen();
   if (nstmtlist)
     retVal = nstmtlist->codegen();
+  varTable.pop_back();
+  level--;
   return retVal;
 }
 Value *NExpStmt::codegen() { return exp.codegen(); }
 Value *NCompStStmt::codegen() {
   // begin
 
-  return nullptr;
+  return compst.codegen();
   // end
 }
 Value *NRetutnStmt::codegen() {
@@ -704,7 +968,13 @@ Value *NRetutnStmt::codegen() {
   auto *retVal = exp.codegen();
   // check the return type and fundec type
   // begin
-
+  if(!retVal)
+  return retVal;
+  if(retVal->getType() != theFun->getReturnType())
+  {
+    printSemanticError(7, line, "Wrong return type.");
+    return LogErrorV("Wrong return type.");
+  }
   // end
     builder->CreateRet(retVal);
   return retVal;
@@ -712,6 +982,25 @@ Value *NRetutnStmt::codegen() {
 Value *NIfStmt::codegen() {
   Function *theFun = builder->GetInsertBlock()->getParent();
   // begin
+  Value *retVal = nullptr;
+  Value *compI = exp.codegen();
+  Value* condValI = builder->CreateICmpNE(compI, Constant::getNullValue(compI->getType()), "condValI");
+  // 真和后继两个基本块
+  BasicBlock* thenBlockI = BasicBlock::Create(*theContext, "thenI", theFun);
+  BasicBlock* contBlockI = BasicBlock::Create(*theContext, "contI", theFun);
+  // 根据比较值跳转
+  builder->CreateCondBr(condValI, thenBlockI, contBlockI);
+  // 设置真基本块标志
+  builder->SetInsertPoint(thenBlockI);
+  retVal = ConstantInt::get(*theContext, APInt(32, 1, true));
+  stmt.codegen();
+  // 进入后继基本块
+  builder->CreateBr(contBlockI);
+  // 设置后继基本块标志
+  builder->SetInsertPoint(contBlockI);
+  if (!retVal) { retVal = ConstantInt::get(*theContext, APInt(32, 0, true)); }
+  return retVal;
+
 
   return nullptr;
   // end
@@ -719,28 +1008,68 @@ Value *NIfStmt::codegen() {
 Value *NIfElseStmt::codegen() {
   Function *theFun = builder->GetInsertBlock()->getParent();
   // begin
-
-  return nullptr;
+  Value* retVal = nullptr;
+  Value* compIE = exp.codegen();
+  Value* condValIE = builder->CreateICmpNE(compIE, Constant::getNullValue(compIE->getType()), "condValIE");
+  // 创建真,假,后继三个基本块
+  BasicBlock* thenBlockIE = BasicBlock::Create(*theContext, "thenIE", theFun);
+  BasicBlock* elseBlockIE = BasicBlock::Create(*theContext, "elseIE", theFun);
+  BasicBlock* contBlockIE = BasicBlock::Create(*theContext, "contIE", theFun);
+  // 根据判断值跳转
+  builder->CreateCondBr(condValIE, thenBlockIE, elseBlockIE);
+  // 设置真基本块入口
+  builder->SetInsertPoint(thenBlockIE);
+  retVal = ConstantInt::get(*theContext, APInt(32, 0, true));
+  stmt.codegen();
+  // 进入后继基本块
+  builder->CreateBr(contBlockIE);
+  // 设置假基本块入口
+  builder->SetInsertPoint(elseBlockIE);
+  retVal = ConstantInt::get(*theContext, APInt(32, 1, true));
+  stmt_else.codegen();
+  // 进入后继基本块
+  builder->CreateBr(contBlockIE);
+  // 设置后继基本块入口
+  builder->SetInsertPoint(contBlockIE);
+  return retVal;
   // end
 }
 Value *NWhileStmt::codegen() {
   Function *theFun = builder->GetInsertBlock()->getParent();
   BasicBlock *condb = BasicBlock::Create(*theContext, "cond", theFun);
   // begin
-
-  return nullptr;
+  Value *retVal = nullptr;
+  // 创建两个基本块
+  BasicBlock *doBlockW = BasicBlock::Create(*theContext, "doW", theFun);
+  BasicBlock *ntBlockW = BasicBlock::Create(*theContext, "ntW", theFun);
+  // 跳转判断基本块
+  builder->CreateBr(condb);
+  // 设置判断基本块入口
+  builder->SetInsertPoint(condb);
+  // 进入
+  Value* compW = exp.codegen();
+  Value* condValW = builder->CreateICmpNE(compW, Constant::getNullValue(compW->getType()), "condValW");
+  // 根据condValW值跳转 真为doBlockW 否则为ntBlockW
+  builder->CreateCondBr(condValW, doBlockW, ntBlockW);
+  // 创建doblock入口
+  builder->SetInsertPoint(doBlockW);
+  stmt.codegen();
+  // 跳转到判断基本块
+  builder->CreateBr(condb);
+  // 设置否则为ntBlockW入口
+  builder->SetInsertPoint(ntBlockW);
+  return ConstantInt::get(*theContext, APInt(32, 0, true)); 
   // end
 }
 Value *NBreakStmt::codegen() {
   // begin
-
-  return nullptr;
+  return ConstantInt::get(*theContext, APInt(32, 0, true));
   // end
 }
 Value *NExtDefVarDec::codegen() {
   // begin
 
-  return nullptr;
+  return ConstantInt::get(*theContext, APInt(32, 0, true));
   // end
 }
 Value *NExtDefFunDec::codegen() {
@@ -766,8 +1095,9 @@ Value *NExtDefFunDec::codegen() {
     // Store the initial value into the alloca.
     builder->CreateStore(&arg, alloca);
     // Add arguments to variable symbol table.
-    namedValues[std::string(arg.getName())] = alloca;
-    curNamedValues[std::string(arg.getName())] = alloca;
+    varTable[level].localVar[std::string(arg.getName())] = alloca;
+    // namedValues[std::string(arg.getName())] = alloca;
+    // curNamedValues[std::string(arg.getName())] = alloca;
   }
   if (Value *retVal = compst->codegen()) {
     // Finish off the function.
@@ -776,7 +1106,7 @@ Value *NExtDefFunDec::codegen() {
     verifyFunction(*f);
 
     // Run the optimizer on the function.
-    // theFPM->run(*f);
+    theFPM->run(*f);
     return f;
   }
   // Error reading body, remove function.
@@ -817,3 +1147,4 @@ Value *NProgram::codegen() {
     return nullptr;
   return lastCode;
 }
+
