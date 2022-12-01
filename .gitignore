@@ -17,3 +17,8 @@ parser.tab.c
 
 minic
 test.in
+
+ans.out
+task1
+task2
+tmp*
