@@ -1,2 +1,3 @@
 test:
-	python3 lab_dispatch.py lab3 judge_303.sh
+	python3 lab_dispatch.py lab4 judge_405.sh
+
