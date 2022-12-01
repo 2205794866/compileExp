@@ -601,7 +601,7 @@ Value *NChar::codegen() {
   // end
 }
 Value *NIdentifier::codegen() {
-  debug("NIdentifier");
+  debug(std::string("NIdentifier") + ":" + name);
   // begin
   Value *retVal;
   // 从底层往上查找
@@ -693,6 +693,10 @@ Value *NBinaryOperator::codegen() {
   else if(name == "RELOP==")
   {
     retVal = builder->CreateICmpEQ(tempLHS, tempRHS, "EQ");
+  }
+  else if (name == "RELOP!=") 
+  {
+  retVal = builder->CreateICmpNE(tempLHS, tempRHS, "NE");
   }
   else if(name == "RELOP<=")
   {
