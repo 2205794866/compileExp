@@ -24,15 +24,6 @@ void yyerror(char const *);
 calclist:
 	%empty
 	|calclist exp EOL {printf("=%.10g\n",$2);}
-<<<<<<< HEAD
-exp:term
-	;
-
-term:NUM
-	;
-
-
-=======
 
 exp     :term           { $$ = $1; }
         |exp ADD term   { $$ = $1 + $3;}
@@ -49,7 +40,6 @@ factor  : NUM           {$$ = $1;}
         |SUB factor     {$$ = -$2;}
         |ADD factor     {$$ = $2;}
         ;
->>>>>>> ac2d5e5933c42ab46add00ee7c21042925483205
 
  /* end */
 %%
