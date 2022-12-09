@@ -69,11 +69,8 @@ int yylex(void)
     case '-': return SUB;
 	case '*': return MUL;
 	case '/': return DIV;
-<<<<<<< HEAD
-=======
     case '(': return LP;
     case ')': return RP;
->>>>>>> ac2d5e5933c42ab46add00ee7c21042925483205
 	default:
 		return c;
 		
